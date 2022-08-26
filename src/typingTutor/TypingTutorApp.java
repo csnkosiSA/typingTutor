@@ -44,6 +44,7 @@ public class TypingTutorApp {
 	
 	public static void setupGUI(int frameX,int frameY,int yLimit) {
 		// Frame init and dimensions
+
     	JFrame frame = new JFrame("Typing Tutor"); 
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	frame.setSize(frameX, frameY);
@@ -72,7 +73,7 @@ public class TypingTutorApp {
        
 	   final JTextField textEntry = new JTextField("",20);
 	   textEntry.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent evt) { 
+	      public void actionPerformed(ActionEvent evt) {
 	    	  //what happens when user pressed enter
 	    	  if (!pause.get()) {
 	    		  String text = textEntry.getText();
@@ -108,7 +109,7 @@ public class TypingTutorApp {
 					FallingWord.resetSpeed();
 		    		done.set(false);
 					startLatch = new CountDownLatch(1); //so threads can start at once
-					createWordMoverThreads();   	 //create new threads for next game 
+					createWordMoverThreads();   	 //create new threads for next game
 			    	startLatch.countDown(); //set wordMovers going - must have barrier[]
 		    	}
 		    	textEntry.requestFocus();
@@ -135,16 +136,12 @@ public class TypingTutorApp {
 					  gameWindow.repaint();
 					 //word movers waiting on starting line
 
-
-
 					 //edited here.
 					   	for (int i=0;i<noWords;i++) {
 					     		try {
 					     			if (wrdShft[i].isAlive())	{
 									wrdShft[i].join();
 									leftWhat[i].join();
-									
-								
 								}
 								} catch (InterruptedException e1) {
 									// TODO Auto-generated catch block
@@ -197,24 +194,23 @@ public class TypingTutorApp {
 	  	//initialize shared array of current words with the words for this game
 		for (int i=0;i<noWords;i++) {
 			words[i]=new FallingWord(dict.getNewWord(),gameWindow.getValidXpos(),yLimit);
+			re[i]= new FallingWord(dict.getNewWord(), 0,yLimit);
 			
 		}
-		re[0]= new FallingWord(dict.getNewWord(), 0,yLimit);
+		
 		//create threads to move them
 	    for (int i=0;i<noWords;i++) {
-	    		wrdShft[i] = new WordMover(words[i],dict,score,startLatch,done,pause);
+	    		wrdShft[i] = new WordMover(words[i],re[0],dict,score,startLatch,done,pause);
 			
-				
+				leftWhat[i]= new HungryWordMover(re[0],words[i],dict, score, startLatch, done, pause);
 	    }
-		leftWhat[0]= new HungryWordMover(re[0], dict, score, startLatch, done, pause);
+		
         //word movers waiting on starting line
      	for (int i=0;i<noWords;i++) {
      		wrdShft[i] .start();
-			
-		
+			leftWhat[i].start();
      	}
-		 leftWhat[0].start();
-		
+
 	}
 	
 public static String[] getDictFromFile(String filename) {
@@ -266,7 +262,7 @@ public static void main(String[] args) {
 		leftWhat = new HungryWordMover[noWords];
 		re = new FallingWord[noWords];
 		
-		CatchWord.setWords(words);  //class setter - static method
+		CatchWord.setWords(words,re);  //class setter - static method
 		CatchWord.setScore(score);  //class setter - static method
 		CatchWord.setFlags(done,pause); //class setter - static method
 

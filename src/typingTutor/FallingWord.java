@@ -5,7 +5,6 @@ public class FallingWord {
 	private int x; //position - width
 	private int y; // postion - height
 	private int maxY; //maximum height
-	private int maxX=1000;
 	private boolean dropped; //flag for if user does not manage to catch word in time
 	
 	private int fallingSpeed; //how fast this word is
@@ -57,8 +56,9 @@ public class FallingWord {
 	}
 	
 	public synchronized  void setX(int x) {
-		if (this.getX()>maxX && y==350) {
-			x=maxX;
+		int maxX = 800;
+		if (this.getX()> maxX && y==200) {
+			x= maxX;
 			dropped=true; //user did not manage to catch this word
 		}
 		this.x=x;
@@ -97,18 +97,12 @@ public class FallingWord {
 		resetPos();
 		word=dict.getNewWord();
 		dropped=false;
-		fallingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); 
-		//System.out.println(getWord() + " falling speed = " + getSpeed());
+		fallingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait);
 	}
 	
 	public synchronized boolean matchWord(String typedText) {
 		//System.out.println("Matching against: "+text);
-		if (typedText.equals(this.word)) {
-			resetWord();
-			return true;
-		}
-		else
-			return false;
+		return typedText.equals(this.word);
 	}
 
 	public synchronized  void drop(int inc) {
@@ -116,9 +110,9 @@ public class FallingWord {
 	}
 
 	public synchronized void leftDrop(int inc){
-
+		sleep(4000);
 		setX(x+inc);
-		setY(350);
+		setY(200);
 	}
 	
 	public synchronized  boolean dropped() {
