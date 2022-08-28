@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class WordMover extends Thread {
 	private FallingWord myWord;
-   private FallingWord word1;
+	private FallingWord hungryWord;
 	private AtomicBoolean done;
 	private AtomicBoolean pause; 
 	private Score score;
@@ -15,21 +15,20 @@ public class WordMover extends Thread {
 		myWord = word;
 	}
 	
-	WordMover( FallingWord word,FallingWord word1,WordDictionary dict, Score score,
+	WordMover( FallingWord word,FallingWord hungryWord,WordDictionary dict, Score score,
 			CountDownLatch startLatch, AtomicBoolean d, AtomicBoolean p) {
 		this(word);
+	    this.hungryWord = hungryWord;
 		this.startLatch = startLatch;
 		this.score=score;
 		this.done=d;
 		this.pause=p;
-      this.word1=word1;
 	}
 	
 	
 	
 	public void run() {
 
-		//System.out.println(myWord.getWord() + " falling speed = " + myWord.getSpeed());
 		try {
 			System.out.println(myWord.getWord() + " waiting to start " );
 			startLatch.await();
@@ -38,53 +37,38 @@ public class WordMover extends Thread {
 			e1.printStackTrace();
 		} //wait for other threads to start
 		System.out.println(myWord.getWord() + " started" );
-      int one=0,two=0;
-		while (!done.get()) {				
+		int first=0;
+		int second=0;
+
+		while (!done.get()) {
+
 			//animate the word
+			synchronized(this){
 			while (!myWord.dropped() && !done.get()) {
-               
-                if (word1.getX()>myWord.getX()){
-                   one=word1.getX();
-                   two=myWord.getX();
-                  
-                }
-                else{
-                  two=word1.getX();
-                   one=myWord.getX();
-                }
-                  System.out.println("word " +myWord.getWord()+" green "+(1000-two)+" nom: "+(1000-one));
-				    if (myWord.getY()>180 && myWord.getY()<210 && ((1000-two)-(1000-one)<=26)){ 
-               
-                
-//                   System.out.println("word " +myWord.getWord()+" green "+word1.getY()+" nom: "+myWord.getY());
+				boolean guard = false;
+                if (hungryWord.getX()>=myWord.getX()){
+					first=hungryWord.getX();
+					second=myWord.getX(); 
+				 }
+				 else{
+				   	second = hungryWord.getX();
+					first = myWord.getX();
+				 }
+				 	
+					 if (myWord.getY()>=180 && myWord.getY()<=210 && ((1000-second)-(1000-first)<=26)){ 
+						   
+				           myWord.resetWord();
+						   score.missedWord();
+						   guard = true;
+						}
 
-						score.missedWord();
-				      myWord.resetWord();}
-                // else if (word1.getX()>myWord.getX()){
-// 				   if (myWord.getY()>180 && myWord.getY()<210 && word1.getX()-80>=myWord.getX()){ 
-//                 int p=Integer.valueOf(word1.getX());
-//                  System.out.println("word " +myWord.getWord()+" green "+p+" nom: "+(myWord.getX()-70));
-//                   System.out.println("word " +myWord.getWord()+" green "+word1.getY()+" nom: "+myWord.getY());
-// 
-//                                 //   score.missedWord();
-// 				      myWord.resetWord();}}
-// 
-                myWord.drop(5);
-                       
-				    if (myWord.getY()>180 && myWord.getY()<210 && ((1000-two)-(1000-one)<=26)){ 
-               
-                
-//                   System.out.println("word " +myWord.getWord()+" green "+word1.getY()+" nom: "+myWord.getY());
+				    myWord.drop(10);
 
-                                 score.missedWord();
-				      myWord.resetWord();}
-
-               // //  if (myWord.getY()>180 && myWord.getY()<210 &&  word1.getX()>=myWord.getX()-75 
-//                  
-//               ){
-//         // score.missedWord();
-//         System.out.println("green "+word1.getX()+" nom: "+myWord.getX());
-// 				      myWord.resetWord();}
+					if (!guard  && myWord.getY()>=180 && myWord.getY()<=210 && ((1000-second)-(1000-first)<=26)){ 
+					    
+							myWord.resetWord();
+							score.missedWord();
+					}
 
 					try {
 						sleep(myWord.getSpeed());
@@ -92,12 +76,13 @@ public class WordMover extends Thread {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					};		
-					while(pause.get()&&!done.get()) {};
+					while(pause.get() && !done.get()) {};
 			}
 			if (!done.get() && myWord.dropped()) {
 				score.missedWord();
 				myWord.resetWord();
 			}
+		}
 			myWord.resetWord();
 		}
 	}

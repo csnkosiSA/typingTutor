@@ -14,18 +14,18 @@ public class GamePanel extends JPanel implements Runnable {
 		private AtomicBoolean won ; //REMOVE
 
 		private FallingWord[] words;
-		private FallingWord[] re;
+		private FallingWord[] hungryWord;
 		private int noWords;
 		private final static int borderWidth=25; //appearance - border
 
-		GamePanel(FallingWord[] words,FallingWord[]re, int maxY,	
+		GamePanel(FallingWord[] words,FallingWord[] hungryWord, int maxY,	
 				 AtomicBoolean d, AtomicBoolean s, AtomicBoolean w) {
 			this.words=words; //shared word list
 			noWords = words.length; //only need to do this once
 			done=d; //REMOVE
 			started=s; //REMOVE
 			won=w; //REMOVE
-			this.re = re;
+			this.hungryWord = hungryWord;
 			
 		}
 		
@@ -49,20 +49,25 @@ public class GamePanel extends JPanel implements Runnable {
 		    		g.drawString(words[i].getWord(),words[i].getX()+borderWidth,words[i].getY());	
 					
 		    	}
-				g.setColor(Color.GREEN);
-				int ran =  (int)Math.random()*50;
-				g.drawString(re[0].getWord(), re[0].getX()+ borderWidth,re[0].getY() );
+
+				//added changes 
+				g.setColor(Color.GREEN); //change the color to make hungry word green 
+				g.drawString(hungryWord[0].getWord(), hungryWord[0].getX()+ borderWidth,hungryWord[0].getY() );
 
 		    	g.setColor(Color.lightGray); //change colour of pen
 		    	g.fillRect(borderWidth,0,width,borderWidth);
 		   }
+
 		   else { if (won.get()) {
 			   g.setFont(new Font("Arial", Font.BOLD, 36));
 			   g.drawString("Well done!",width/3,height/2);	
-		   } else {
-			   g.setFont(new Font("Arial", Font.BOLD, 36));
-			   g.drawString("Game over!",width/2,height/2);	
-		   }
+		   	} 
+			
+				else {
+
+				g.setFont(new Font("Arial", Font.BOLD, 36));
+				g.drawString("Game over!",width/2,height/2);	
+				}
 		   }
 		}
 		

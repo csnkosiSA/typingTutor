@@ -44,7 +44,6 @@ public class TypingTutorApp {
 	
 	public static void setupGUI(int frameX,int frameY,int yLimit) {
 		// Frame init and dimensions
-
     	JFrame frame = new JFrame("Typing Tutor"); 
     	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	frame.setSize(frameX, frameY);
@@ -73,7 +72,7 @@ public class TypingTutorApp {
        
 	   final JTextField textEntry = new JTextField("",20);
 	   textEntry.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent evt) {
+	      public void actionPerformed(ActionEvent evt) { 
 	    	  //what happens when user pressed enter
 	    	  if (!pause.get()) {
 	    		  String text = textEntry.getText();
@@ -109,7 +108,7 @@ public class TypingTutorApp {
 					FallingWord.resetSpeed();
 		    		done.set(false);
 					startLatch = new CountDownLatch(1); //so threads can start at once
-					createWordMoverThreads();   	 //create new threads for next game
+					createWordMoverThreads();   	 //create new threads for next game 
 			    	startLatch.countDown(); //set wordMovers going - must have barrier[]
 		    	}
 		    	textEntry.requestFocus();
@@ -136,12 +135,16 @@ public class TypingTutorApp {
 					  gameWindow.repaint();
 					 //word movers waiting on starting line
 
+
+
 					 //edited here.
 					   	for (int i=0;i<noWords;i++) {
 					     		try {
 					     			if (wrdShft[i].isAlive())	{
 									wrdShft[i].join();
 									leftWhat[i].join();
+									
+								
 								}
 								} catch (InterruptedException e1) {
 									// TODO Auto-generated catch block
@@ -202,7 +205,7 @@ public class TypingTutorApp {
 	    for (int i=0;i<noWords;i++) {
 	    		wrdShft[i] = new WordMover(words[i],re[0],dict,score,startLatch,done,pause);
 			
-				leftWhat[i]= new HungryWordMover(re[0],words[i],dict, score, startLatch, done, pause);
+				leftWhat[i]= new HungryWordMover(re[0],words[i], dict, score, startLatch, done, pause);
 	    }
 		
         //word movers waiting on starting line
@@ -210,7 +213,8 @@ public class TypingTutorApp {
      		wrdShft[i] .start();
 			leftWhat[i].start();
      	}
-
+		 
+		
 	}
 	
 public static String[] getDictFromFile(String filename) {
